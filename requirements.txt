@@ -1,0 +1,6 @@
+gradio>=5.0
+rembg
+Pillow
+requests
+python-dotenv
+numpy
