@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印迹 App 产品规划</title>
+<style>
+  :root {
+    --ink-red: #CC2200;
+    --ink-dark: #8B1A1A;
+    --bg-cream: #FDF8F0;
+    --bg-warm: #F5EDE0;
+    --text-main: #2C2420;
+    --text-sub: #7A6E64;
+    --border: #E0D5C8;
+    --accent-blue: #003366;
+    --accent-green: #1A5C3A;
+    --accent-gold: #CC6600;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.1);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,.12);
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: var(--bg-cream);
+    color: var(--text-main);
+    line-height: 1.7;
+  }
+
+  /* ── Header ── */
+  .hero {
+    background: linear-gradient(135deg, #8B1A1A 0%, #CC2200 50%, #A01800 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 25L55 30L35 35L30 55L25 35L5 30L25 25Z' fill='white' opacity='.04'/%3E%3C/svg%3E") repeat;
+  }
+  .hero h1 { font-size: 2.8em; font-weight: 800; position: relative; }
+  .hero h1 span { font-size: .5em; display: block; font-weight: 400; margin-top: 8px; opacity: .85; letter-spacing: 2px; }
+  .hero-badge {
+    display: inline-block; margin-top: 20px; padding: 6px 20px;
+    border: 1.5px solid rgba(255,255,255,.5); border-radius: 20px;
+    font-size: .85em; opacity: .8; position: relative;
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 60px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .section-num {
+    display: inline-block; width: 32px; height: 32px; line-height: 32px;
+    text-align: center; border-radius: 50%; font-size: .8em; font-weight: 700;
+    background: var(--ink-red); color: white; margin-right: 10px;
+    vertical-align: middle;
+  }
+  h2 {
+    font-size: 1.6em; font-weight: 700; margin-bottom: 24px;
+    display: flex; align-items: center;
+  }
+  h3 { font-size: 1.15em; margin: 20px 0 10px; color: var(--ink-dark); }
+  p, li { font-size: .95em; color: var(--text-sub); }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 6px; }
+
+  /* ── Cards ── */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px; margin-top: 16px;
+  }
+  .card {
+    background: white; border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .card-icon { font-size: 1.8em; margin-bottom: 10px; }
+  .card h4 { font-size: 1.05em; margin-bottom: 6px; }
+  .card p { font-size: .88em; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 10px;
+    font-size: .72em; font-weight: 600; margin-top: 8px;
+  }
+  .badge-core { background: #FEE2E2; color: #991B1B; }
+  .badge-v2 { background: #E0E7FF; color: #3730A3; }
+  .badge-v3 { background: #D1FAE5; color: #065F46; }
+
+  /* ── Table ── */
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    background: white; border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  th, td { padding: 12px 16px; text-align: left; font-size: .88em; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg-warm); font-weight: 600; color: var(--text-main); }
+  td { color: var(--text-sub); }
+
+  /* ── Flowchart ── */
+  .flow-container {
+    background: white; border-radius: var(--radius); padding: 32px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    margin: 20px 0; overflow-x: auto;
+  }
+  .flow-row {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 8px; margin: 12px 0;
+  }
+  .flow-step {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 10px;
+    font-size: .85em; font-weight: 500; white-space: nowrap;
+  }
+  .flow-step.action { background: var(--ink-red); color: white; }
+  .flow-step.process { background: #EEF2FF; color: #3730A3; border: 1px solid #C7D2FE; }
+  .flow-step.result { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+  .flow-step.local { background: #FEF9C3; color: #854D0E; border: 1px solid #FDE68A; }
+  .flow-arrow { color: var(--text-sub); font-size: 1.2em; }
+
+  /* ── Phone Mockup ── */
+  .mockup-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px; margin: 24px 0;
+  }
+  .phone-wrap { text-align: center; }
+  .phone-wrap .label {
+    font-size: .85em; font-weight: 600; color: var(--ink-dark);
+    margin-bottom: 12px;
+  }
+  .phone {
+    width: 260px; height: 520px; margin: 0 auto;
+    background: #1A1A1A; border-radius: 36px; padding: 12px;
+    box-shadow: var(--shadow-lg), inset 0 0 0 2px #333;
+    position: relative;
+  }
+  .phone-screen {
+    width: 100%; height: 100%; background: white;
+    border-radius: 26px; overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+
+  /* Phone inner components */
+  .phone-status {
+    height: 32px; background: white; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 10px; color: #333; font-weight: 600;
+  }
+  .phone-nav {
+    height: 44px; display: flex; align-items: center;
+    padding: 0 14px; border-bottom: 1px solid #eee;
+    font-size: 13px; font-weight: 600;
+  }
+  .phone-nav .back { margin-right: 8px; opacity: .5; }
+  .phone-body { flex: 1; overflow: hidden; position: relative; }
+  .phone-tab-bar {
+    height: 52px; background: white; border-top: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 0 8px;
+  }
+  .tab-item {
+    display: flex; flex-direction: column; align-items: center;
+    font-size: 9px; color: #999; gap: 2px;
+  }
+  .tab-item.active { color: var(--ink-red); }
+  .tab-icon { font-size: 18px; }
+
+  /* ── Screen: Home (Collection) ── */
+  .home-hero {
+    background: linear-gradient(135deg, #8B1A1A, #CC2200);
+    color: white; padding: 16px 14px 20px; position: relative;
+  }
+  .home-hero h3 { font-size: 16px; font-weight: 700; color: white; margin: 0; }
+  .home-hero p { font-size: 10px; opacity: .8; margin-top: 2px; color: white; }
+  .home-stats {
+    display: flex; gap: 16px; margin-top: 10px;
+  }
+  .home-stat { text-align: center; }
+  .home-stat .num { font-size: 18px; font-weight: 700; }
+  .home-stat .txt { font-size: 8px; opacity: .7; }
+  .stamp-grid-mini {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; padding: 12px 14px;
+  }
+  .stamp-thumb {
+    aspect-ratio: 1; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 28px; position: relative;
+  }
+  .stamp-thumb .s-label {
+    position: absolute; bottom: 3px; left: 0; right: 0;
+    text-align: center; font-size: 7px; color: var(--text-sub);
+  }
+
+  /* ── Screen: Create ── */
+  .create-upload {
+    margin: 12px 14px; height: 120px; border: 2px dashed #ddd;
+    border-radius: 12px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: #bbb;
+  }
+  .create-upload .icon { font-size: 28px; }
+  .create-upload .txt { font-size: 10px; margin-top: 4px; }
+  .option-section {
+    padding: 8px 14px;
+  }
+  .option-label { font-size: 10px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; }
+  .option-pills {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .pill {
+    padding: 4px 10px; border-radius: 14px; font-size: 9px;
+    border: 1px solid #ddd; color: var(--text-sub);
+    white-space: nowrap;
+  }
+  .pill.active { background: var(--ink-red); color: white; border-color: var(--ink-red); }
+  .color-dots {
+    display: flex; gap: 8px; margin-top: 4px;
+  }
+  .color-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid transparent;
+  }
+  .color-dot.active { border-color: #333; box-shadow: 0 0 0 2px white inset; }
+  .create-btn {
+    margin: 12px 14px; padding: 10px; background: var(--ink-red);
+    color: white; text-align: center; border-radius: 10px;
+    font-size: 12px; font-weight: 600;
+  }
+
+  /* ── Screen: Result ── */
+  .result-display {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background: repeating-conic-gradient(#f0f0f0 0% 25%, white 0% 50%) 50%/16px 16px;
+  }
+  .result-stamp {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, var(--ink-red) 60%, rgba(204,34,0,.3) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; filter: drop-shadow(0 2px 8px rgba(0,0,0,.15));
+  }
+  .result-actions {
+    display: flex; gap: 8px; padding: 12px 14px;
+  }
+  .result-action-btn {
+    flex: 1; padding: 8px; text-align: center; border-radius: 8px;
+    font-size: 10px; font-weight: 500;
+  }
+  .result-action-btn.primary { background: var(--ink-red); color: white; }
+  .result-action-btn.secondary { background: #f5f5f5; color: #333; }
+  .result-regen {
+    padding: 8px 14px; display: flex; gap: 6px; overflow-x: auto;
+  }
+  .regen-thumb {
+    width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; border: 1px solid #eee;
+  }
+  .regen-thumb.active { border: 2px solid var(--ink-red); }
+
+  /* ── Screen: Album ── */
+  .album-cover {
+    margin: 12px 14px; height: 100px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--bg-warm), #E8DDD0);
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; padding: 0 20px;
+  }
+  .album-cover .stamps { display: flex; gap: -8px; }
+  .album-cover .stamp-mini {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin-left: -6px; border: 2px solid white;
+  }
+  .album-info { text-align: left; }
+  .album-info h4 { font-size: 12px; color: var(--text-main); margin: 0; }
+  .album-info p { font-size: 9px; color: var(--text-sub); margin: 0; }
+  .album-stamps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; padding: 12px 14px;
+  }
+  .album-stamp-item {
+    text-align: center;
+  }
+  .album-stamp-circle {
+    width: 56px; height: 56px; margin: 0 auto;
+    border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .album-stamp-name { font-size: 8px; color: var(--text-sub); margin-top: 3px; }
+  .album-stamp-date { font-size: 7px; color: #ccc; }
+
+  /* ── Screen: Map ── */
+  .map-view {
+    flex: 1; position: relative;
+    background: #E8E4D8;
+    background-image:
+      linear-gradient(rgba(0,0,0,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .map-pin {
+    position: absolute; display: flex; flex-direction: column;
+    align-items: center; font-size: 9px;
+  }
+  .map-pin .pin-stamp {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  .map-pin .pin-label {
+    background: white; padding: 1px 6px; border-radius: 4px;
+    margin-top: 2px; font-size: 7px; color: var(--text-main);
+    box-shadow: 0 1px 3px rgba(0,0,0,.1); white-space: nowrap;
+  }
+
+  /* ── Pipeline v2 ── */
+  .pipeline-v2 {
+    background: white; border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+  .pipe-step {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 14px 0; border-bottom: 1px dashed var(--border);
+  }
+  .pipe-step:last-child { border: none; }
+  .pipe-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75em; font-weight: 700; flex-shrink: 0;
+  }
+  .pipe-num.remote { background: #FEE2E2; color: #991B1B; }
+  .pipe-num.local { background: #E0E7FF; color: #3730A3; }
+  .pipe-num.new { background: #D1FAE5; color: #065F46; }
+  .pipe-content h4 { font-size: .9em; margin-bottom: 2px; }
+  .pipe-content p { font-size: .82em; color: var(--text-sub); }
+  .pipe-tag {
+    display: inline-block; padding: 1px 8px; border-radius: 8px;
+    font-size: .7em; margin-left: 6px;
+  }
+  .pipe-tag.remote { background: #FEF2F2; color: #B91C1C; }
+  .pipe-tag.local { background: #EEF2FF; color: #4338CA; }
+  .pipe-tag.new { background: #F0FDF4; color: #166534; }
+
+  /* ── Roadmap ── */
+  .roadmap { position: relative; padding-left: 32px; margin: 20px 0; }
+  .roadmap::before {
+    content: ""; position: absolute; left: 14px; top: 0; bottom: 0;
+    width: 2px; background: var(--border);
+  }
+  .roadmap-item {
+    position: relative; margin-bottom: 28px;
+  }
+  .roadmap-dot {
+    position: absolute; left: -25px; top: 4px;
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 3px solid white; box-shadow: 0 0 0 2px var(--border);
+  }
+  .roadmap-dot.done { background: var(--accent-green); box-shadow: 0 0 0 2px var(--accent-green); }
+  .roadmap-dot.current { background: var(--ink-red); box-shadow: 0 0 0 2px var(--ink-red); }
+  .roadmap-dot.future { background: white; }
+  .roadmap-phase {
+    font-size: .75em; font-weight: 600; color: var(--text-sub);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .roadmap-title { font-size: 1em; font-weight: 600; margin: 2px 0; }
+  .roadmap-desc { font-size: .85em; color: var(--text-sub); }
+
+  /* ── Tech Architecture ── */
+  .arch-diagram {
+    background: white; border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    margin: 20px 0; text-align: center;
+  }
+  .arch-layer {
+    display: flex; justify-content: center; gap: 12px;
+    margin: 8px 0; flex-wrap: wrap;
+  }
+  .arch-box {
+    padding: 10px 18px; border-radius: 8px; font-size: .82em;
+    font-weight: 500; min-width: 100px; text-align: center;
+  }
+  .arch-box.client { background: #DBEAFE; color: #1E40AF; border: 1px solid #93C5FD; }
+  .arch-box.api { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+  .arch-box.service { background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE; }
+  .arch-box.storage { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+  .arch-box.external { background: #F3E8FF; color: #6B21A8; border: 1px solid #D8B4FE; }
+  .arch-divider {
+    text-align: center; color: var(--text-sub); font-size: .75em;
+    margin: 4px 0; letter-spacing: 4px;
+  }
+  .arch-label {
+    font-size: .72em; color: var(--text-sub); font-weight: 600;
+    text-align: left; margin: 12px 0 4px; text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ── Helpers ── */
+  .highlight-box {
+    background: white; border-left: 4px solid var(--ink-red);
+    padding: 16px 20px; border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0; box-shadow: var(--shadow-sm);
+  }
+  .highlight-box p { color: var(--text-main); font-weight: 500; }
+  .note { font-size: .82em; color: var(--text-sub); font-style: italic; margin-top: 8px; }
+
+  .toc {
+    background: white; border-radius: var(--radius); padding: 24px 32px;
+    margin: -30px auto 40px; max-width: 600px; position: relative;
+    box-shadow: var(--shadow-md); border: 1px solid var(--border);
+  }
+  .toc h3 { font-size: 1em; margin-bottom: 12px; color: var(--ink-dark); }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 4px; }
+  .toc a { color: var(--ink-red); text-decoration: none; font-size: .9em; }
+  .toc a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    .hero { padding: 40px 20px; }
+    .hero h1 { font-size: 2em; }
+    .mockup-grid { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<div class="hero">
+  <h1>印迹 · Imprint
+    <span>AI 印章手账 App 产品规划</span>
+  </h1>
+  <div class="hero-badge">v1.0 Product Plan &mdash; 2026.03</div>
+</div>
+
+<div class="container">
+
+<!-- TOC -->
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#vision">产品定位与愿景</a></li>
+    <li><a href="#features">功能设计</a></li>
+    <li><a href="#pipeline">印章生成流水线（升级版）</a></li>
+    <li><a href="#prototype">原型图 &amp; 操作流程</a></li>
+    <li><a href="#userflow">完整用户操作流程</a></li>
+    <li><a href="#arch">技术架构</a></li>
+    <li><a href="#roadmap">开发路线图</a></li>
+  </ol>
+</div>
+
+<!-- ═══════════════════════════ 1. VISION ═══════════════════════════ -->
+<section id="vision">
+  <h2><span class="section-num">1</span>产品定位与愿景</h2>
+
+  <div class="highlight-box">
+    <p>印迹 = 照片 × 印章风格化 × 手账收集</p>
+    <p class="note">用 AI 将照片变成印章贴纸，像集邮一样收集你的生活印迹。</p>
+  </div>
+
+  <h3>核心理念</h3>
+  <p>用户旅行或日常生活中拍摄的照片，经过 AI 风格转换后变成独一无二的"印章"，可以收藏在数字手账中，按地点、时间、主题组织，形成个人专属的印迹地图。</p>
+
+  <h3>目标用户</h3>
+  <table>
+    <tr><th>用户群体</th><th>核心需求</th><th>使用场景</th></tr>
+    <tr><td>旅行爱好者</td><td>记录每个去过的地方</td><td>到景点拍照 → 生成该地印章 → 收入旅行集</td></tr>
+    <tr><td>手账/文创用户</td><td>独特的装饰素材</td><td>生成印章 → 导出透明PNG → 用于手账排版</td></tr>
+    <tr><td>生活记录者</td><td>日常生活的仪式感</td><td>美食、宠物、孩子的照片 → 印章化留存</td></tr>
+    <tr><td>社交分享用户</td><td>个性化内容创作</td><td>印章拼贴 → 分享到朋友圈/小红书</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════ 2. FEATURES ═══════════════════════════ -->
+<section id="features">
+  <h2><span class="section-num">2</span>功能设计</h2>
+
+  <h3>2.1 印章生成（核心功能升级）</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🎨</div>
+      <h4>更多印章风格</h4>
+      <p>在现有 4 种基础上扩展：水墨国风、版画木刻、波普艺术、像素复古、水彩淡彩、铜版雕刻</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">⭕</div>
+      <h4>印章形状边框</h4>
+      <p>圆形、方形、椭圆、菱形、邮票齿边、不规则手撕边——自动裁切到所选形状</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">✍️</div>
+      <h4>文字叠加</h4>
+      <p>在印章上添加地名、日期、自定义文字，支持多种排版样式（环形、横排、竖排）</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎰</div>
+      <h4>一键多风格预览</h4>
+      <p>上传一张照片，同时生成 4 种风格预览，用户挑选最满意的一个保存</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">✨</div>
+      <h4>印章纹理与做旧</h4>
+      <p>叠加真实印泥纹理：墨迹晕染、边缘磨损、纸张纤维感、年代做旧</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖼️</div>
+      <h4>印章模板库</h4>
+      <p>提供设计师预设的精美印章模板，用户选模板 → 填入自己的照片 → 一键生成</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+  </div>
+
+  <h3>2.2 印章收藏 &amp; 管理</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📖</div>
+      <h4>印章集册</h4>
+      <p>按主题创建集册（如「2026 日本行」「我的美食」），自定义封面，翻页浏览</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🗺️</div>
+      <h4>印迹地图</h4>
+      <p>基于照片 GPS 信息或手动标记，在地图上展示所有印章，点击查看详情</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">📅</div>
+      <h4>时间轴</h4>
+      <p>按时间排列所有印章，自动按月/年分组，形成个人时光印记</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏷️</div>
+      <h4>标签 &amp; 搜索</h4>
+      <p>给印章添加标签，支持按风格/颜色/地点/标签快速检索</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+  </div>
+
+  <h3>2.3 社交与导出</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📤</div>
+      <h4>多格式导出</h4>
+      <p>导出透明 PNG 单图、整册长图、适配社交平台的分享卡片</p>
+      <span class="badge badge-core">核心 v1</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">💌</div>
+      <h4>印章分享卡</h4>
+      <p>自动生成精美分享卡片（印章 + 地点 + 日期 + 背景），一键发朋友圈/小红书</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">👥</div>
+      <h4>社区广场</h4>
+      <p>发现其他用户的精美印章和集册，点赞、收藏、评论</p>
+      <span class="badge badge-v3">v3 远期</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎁</div>
+      <h4>印章互赠</h4>
+      <p>好友间互赠印章，旅行伙伴交换同一地点的不同风格印章</p>
+      <span class="badge badge-v3">v3 远期</span>
+    </div>
+  </div>
+
+  <h3>2.4 体验与激励</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🏆</div>
+      <h4>成就系统</h4>
+      <p>集齐特定主题印章解锁成就：「吃货达人」「城市探索者」「四季旅人」</p>
+      <span class="badge badge-v2">v2 增强</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">📆</div>
+      <h4>每日印章</h4>
+      <p>每天推荐一个"今日主题"，激励用户拍照打卡，保持使用粘性</p>
+      <span class="badge badge-v3">v3 远期</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ 3. PIPELINE ═══════════════════════════ -->
+<section id="pipeline">
+  <h2><span class="section-num">3</span>印章生成流水线（升级版）</h2>
+
+  <p>在现有 Demo 流水线基础上，App 版本增加形状裁切和文字叠加步骤：</p>
+
+  <div class="pipeline-v2">
+    <div class="pipe-step">
+      <div class="pipe-num remote">1</div>
+      <div class="pipe-content">
+        <h4>AI 风格转换 <span class="pipe-tag remote">远程 API</span></h4>
+        <p>原图 + 风格提示词 → Gemini 生成黑白印章风格图。支持 10+ 种风格提示词模板。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num local">2</div>
+      <div class="pipe-content">
+        <h4>对比度增强 <span class="pipe-tag local">本地处理</span></h4>
+        <p>直方图拉伸 + 对比度增强，让线条更锐利分明。与 Demo 版相同。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num local">3</div>
+      <div class="pipe-content">
+        <h4>智能抠图 <span class="pipe-tag local">本地处理</span></h4>
+        <p>rembg 去除背景，输出 RGBA 透明 PNG。App 可将此步移至服务端加速。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num new">4</div>
+      <div class="pipe-content">
+        <h4>形状裁切 <span class="pipe-tag new">新增</span></h4>
+        <p>应用用户选择的印章形状遮罩：圆形、方形、椭圆、邮票齿边等。使用 alpha 通道 mask 实现。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num local">5</div>
+      <div class="pipe-content">
+        <h4>印泥上色 <span class="pipe-tag local">本地处理</span></h4>
+        <p>深色像素替换为目标颜色，浅色像素透明。保留亮度层次模拟浓淡效果。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num new">6</div>
+      <div class="pipe-content">
+        <h4>纹理叠加 <span class="pipe-tag new">新增</span></h4>
+        <p>叠加印泥纹理/磨损效果/纸张纤维，增加真实感。可选做旧程度。</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num new">7</div>
+      <div class="pipe-content">
+        <h4>文字排版 <span class="pipe-tag new">新增</span></h4>
+        <p>在印章边缘或中央叠加文字（地名/日期/自定义），支持环形排列、竖排等。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-container">
+    <div style="text-align:center;font-size:.85em;font-weight:600;margin-bottom:12px;color:var(--ink-dark);">数据流概览</div>
+    <div class="flow-row">
+      <span class="flow-step action">📷 原始照片</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step process">🤖 Gemini 风格化</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step local">📈 对比度增强</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step local">✂️ 背景去除</span>
+    </div>
+    <div class="flow-row">
+      <span class="flow-arrow" style="transform:rotate(90deg)">→</span>
+    </div>
+    <div class="flow-row">
+      <span class="flow-step result">💾 保存到集册</span>
+      <span class="flow-arrow">←</span>
+      <span class="flow-step process">✍️ 文字叠加</span>
+      <span class="flow-arrow">←</span>
+      <span class="flow-step process">🧱 纹理做旧</span>
+      <span class="flow-arrow">←</span>
+      <span class="flow-step process">⭕ 形状裁切 + 上色</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ 4. PROTOTYPE ═══════════════════════════ -->
+<section id="prototype">
+  <h2><span class="section-num">4</span>原型图 &amp; 操作流程</h2>
+
+  <p>以下为 App 的 5 个核心页面原型：</p>
+
+  <div class="mockup-grid">
+
+    <!-- ── Screen 1: Home ── -->
+    <div class="phone-wrap">
+      <div class="label">首页 · 我的印迹</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status">9:41</div>
+        <div class="phone-body">
+          <div class="home-hero">
+            <h3>我的印迹</h3>
+            <p>每一个印章，都是一段故事</p>
+            <div class="home-stats">
+              <div class="home-stat"><div class="num">48</div><div class="txt">枚印章</div></div>
+              <div class="home-stat"><div class="num">5</div><div class="txt">本集册</div></div>
+              <div class="home-stat"><div class="num">12</div><div class="txt">座城市</div></div>
+            </div>
+          </div>
+          <div style="padding:10px 14px 4px;font-size:11px;font-weight:600;color:var(--text-main);display:flex;justify-content:space-between;">
+            <span>最近印章</span><span style="color:var(--ink-red);font-weight:400;font-size:10px;">查看全部 &gt;</span>
+          </div>
+          <div class="stamp-grid-mini">
+            <div class="stamp-thumb" style="background:#FEE2E2;">🏯<div class="s-label">京都金阁寺</div></div>
+            <div class="stamp-thumb" style="background:#E0E7FF;">🗼<div class="s-label">东京塔</div></div>
+            <div class="stamp-thumb" style="background:#ECFDF5;">🌸<div class="s-label">上野樱花</div></div>
+            <div class="stamp-thumb" style="background:#FEF3C7;">🍜<div class="s-label">一兰拉面</div></div>
+            <div class="stamp-thumb" style="background:#F3E8FF;">⛩️<div class="s-label">伏见稻荷</div></div>
+            <div class="stamp-thumb" style="background:#FEE2E2;">🎋<div class="s-label">岚山竹林</div></div>
+          </div>
+          <div style="padding:4px 14px;font-size:11px;font-weight:600;color:var(--text-main);">我的集册</div>
+          <div style="padding:4px 14px;display:flex;gap:8px;">
+            <div style="flex:1;background:#FDF2F2;border-radius:8px;padding:8px;text-align:center;">
+              <div style="font-size:20px;">🇯🇵</div>
+              <div style="font-size:8px;color:var(--text-sub);margin-top:2px;">2026 日本行</div>
+              <div style="font-size:7px;color:#ccc;">24 枚</div>
+            </div>
+            <div style="flex:1;background:#F0FDF4;border-radius:8px;padding:8px;text-align:center;">
+              <div style="font-size:20px;">🍱</div>
+              <div style="font-size:8px;color:var(--text-sub);margin-top:2px;">美食集章</div>
+              <div style="font-size:7px;color:#ccc;">16 枚</div>
+            </div>
+            <div style="flex:1;background:#f5f5f5;border-radius:8px;padding:8px;text-align:center;border:1px dashed #ddd;">
+              <div style="font-size:20px;color:#ccc;">+</div>
+              <div style="font-size:8px;color:#ccc;margin-top:2px;">新建集册</div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-tab-bar">
+          <div class="tab-item active"><span class="tab-icon">🏠</span>首页</div>
+          <div class="tab-item"><span class="tab-icon">🗺️</span>地图</div>
+          <div class="tab-item" style="position:relative;"><span class="tab-icon" style="font-size:28px;color:var(--ink-red);margin-top:-14px;background:var(--ink-red);color:white;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;">+</span></div>
+          <div class="tab-item"><span class="tab-icon">📖</span>集册</div>
+          <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── Screen 2: Create ── -->
+    <div class="phone-wrap">
+      <div class="label">创建印章 · 选择风格</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status">9:41</div>
+        <div class="phone-nav"><span class="back">&lt;</span>创建印章</div>
+        <div class="phone-body">
+          <div class="create-upload">
+            <div class="icon">📷</div>
+            <div class="txt">拍照 / 从相册选取</div>
+          </div>
+          <div class="option-section">
+            <div class="option-label">印章风格</div>
+            <div class="option-pills">
+              <span class="pill active">复古橡皮章</span>
+              <span class="pill">现代极简</span>
+              <span class="pill">金石篆刻</span>
+              <span class="pill">涂鸦线描</span>
+            </div>
+            <div class="option-pills" style="margin-top:4px;">
+              <span class="pill">水墨国风</span>
+              <span class="pill">版画木刻</span>
+              <span class="pill">波普艺术</span>
+              <span class="pill">像素复古</span>
+            </div>
+          </div>
+          <div class="option-section">
+            <div class="option-label">印章形状</div>
+            <div class="option-pills">
+              <span class="pill active">⭕ 圆形</span>
+              <span class="pill">⬜ 方形</span>
+              <span class="pill">📮 邮票</span>
+              <span class="pill">💎 菱形</span>
+            </div>
+          </div>
+          <div class="option-section">
+            <div class="option-label">印泥颜色</div>
+            <div class="color-dots">
+              <div class="color-dot active" style="background:#CC2200;"></div>
+              <div class="color-dot" style="background:#1A1A1A;"></div>
+              <div class="color-dot" style="background:#003366;"></div>
+              <div class="color-dot" style="background:#1A5C3A;"></div>
+              <div class="color-dot" style="background:#5C1A5C;"></div>
+              <div class="color-dot" style="background:#CC6600;"></div>
+              <div class="color-dot" style="background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red);"></div>
+            </div>
+          </div>
+          <div class="option-section">
+            <div class="option-label">添加文字 <span style="font-weight:400;color:#bbb;">（可选）</span></div>
+            <div style="display:flex;gap:6px;">
+              <div style="flex:1;height:28px;border:1px solid #ddd;border-radius:6px;padding:0 8px;font-size:9px;color:#bbb;display:flex;align-items:center;">输入地名或自定义文字...</div>
+              <div style="padding:4px 10px;background:#f5f5f5;border-radius:6px;font-size:9px;color:#666;">环形</div>
+            </div>
+          </div>
+          <div class="create-btn">✨ 生成印章</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── Screen 3: Result ── -->
+    <div class="phone-wrap">
+      <div class="label">生成结果 · 预览保存</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status">9:41</div>
+        <div class="phone-nav"><span class="back">&lt;</span>印章预览</div>
+        <div class="phone-body" style="display:flex;flex-direction:column;">
+          <div class="result-display" style="flex:1;">
+            <div class="result-stamp">🏯</div>
+          </div>
+          <div style="padding:8px 14px 0;">
+            <div style="font-size:10px;font-weight:600;color:var(--text-main);margin-bottom:6px;">其他风格</div>
+          </div>
+          <div class="result-regen">
+            <div class="regen-thumb active" style="background:#FEE2E2;">🏯</div>
+            <div class="regen-thumb" style="background:#E0E7FF;">🏯</div>
+            <div class="regen-thumb" style="background:#ECFDF5;">🏯</div>
+            <div class="regen-thumb" style="background:#FEF3C7;">🏯</div>
+          </div>
+          <div class="result-actions">
+            <div class="result-action-btn secondary">🔄 重新生成</div>
+            <div class="result-action-btn secondary">📤 分享</div>
+            <div class="result-action-btn primary">💾 保存到集册</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── Screen 4: Album ── -->
+    <div class="phone-wrap">
+      <div class="label">集册 · 翻阅印章</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status">9:41</div>
+        <div class="phone-nav"><span class="back">&lt;</span>2026 日本行</div>
+        <div class="phone-body">
+          <div class="album-cover">
+            <div class="stamps">
+              <div class="album-cover stamp-mini" style="background:#FEE2E2;height:36px;min-height:auto;padding:0;gap:0;">🏯</div>
+              <div class="album-cover stamp-mini" style="background:#E0E7FF;height:36px;min-height:auto;padding:0;gap:0;">🗼</div>
+              <div class="album-cover stamp-mini" style="background:#ECFDF5;height:36px;min-height:auto;padding:0;gap:0;">🌸</div>
+            </div>
+            <div class="album-info">
+              <h4 style="font-size:12px;">2026 日本行</h4>
+              <p style="font-size:9px;">24 枚印章 · 6 座城市</p>
+            </div>
+          </div>
+          <div style="padding:8px 14px 4px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:10px;font-weight:600;">东京 · 8枚</span>
+            <span style="font-size:9px;color:var(--ink-red);">2026.03.10-15</span>
+          </div>
+          <div class="album-stamps">
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#FEE2E2;">🗼</div>
+              <div class="album-stamp-name">东京塔</div>
+              <div class="album-stamp-date">03.10</div>
+            </div>
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#E0E7FF;">🌸</div>
+              <div class="album-stamp-name">上野公园</div>
+              <div class="album-stamp-date">03.11</div>
+            </div>
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#FEF3C7;">🍜</div>
+              <div class="album-stamp-name">一兰拉面</div>
+              <div class="album-stamp-date">03.11</div>
+            </div>
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#F3E8FF;">🎌</div>
+              <div class="album-stamp-name">浅草寺</div>
+              <div class="album-stamp-date">03.12</div>
+            </div>
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#ECFDF5;">🏙️</div>
+              <div class="album-stamp-name">涩谷十字</div>
+              <div class="album-stamp-date">03.13</div>
+            </div>
+            <div class="album-stamp-item">
+              <div class="album-stamp-circle" style="background:#FEE2E2;">🎮</div>
+              <div class="album-stamp-name">秋叶原</div>
+              <div class="album-stamp-date">03.14</div>
+            </div>
+          </div>
+          <div style="padding:4px 14px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:10px;font-weight:600;">京都 · 6枚</span>
+            <span style="font-size:9px;color:var(--ink-red);">2026.03.16-18</span>
+          </div>
+        </div>
+        <div class="phone-tab-bar">
+          <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+          <div class="tab-item"><span class="tab-icon">🗺️</span>地图</div>
+          <div class="tab-item"><span class="tab-icon" style="font-size:28px;color:var(--ink-red);margin-top:-14px;background:var(--ink-red);color:white;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;">+</span></div>
+          <div class="tab-item active"><span class="tab-icon">📖</span>集册</div>
+          <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ── Screen 5: Map ── -->
+    <div class="phone-wrap">
+      <div class="label">印迹地图 · 地理印章</div>
+      <div class="phone"><div class="phone-screen">
+        <div class="phone-status">9:41</div>
+        <div class="phone-nav">印迹地图 <span style="margin-left:auto;font-size:10px;color:var(--ink-red);font-weight:400;">12 座城市</span></div>
+        <div class="phone-body">
+          <div class="map-view">
+            <!-- Map pins representing stamps at locations -->
+            <div class="map-pin" style="top:25%;left:70%;">
+              <div class="pin-stamp" style="background:#FEE2E2;">🗼</div>
+              <div class="pin-label">东京 · 8枚</div>
+            </div>
+            <div class="map-pin" style="top:40%;left:55%;">
+              <div class="pin-stamp" style="background:#ECFDF5;">🏯</div>
+              <div class="pin-label">京都 · 6枚</div>
+            </div>
+            <div class="map-pin" style="top:55%;left:50%;">
+              <div class="pin-stamp" style="background:#E0E7FF;">🏰</div>
+              <div class="pin-label">大阪 · 4枚</div>
+            </div>
+            <div class="map-pin" style="top:70%;left:30%;">
+              <div class="pin-stamp" style="background:#FEF3C7;">🌋</div>
+              <div class="pin-label">富士山 · 2枚</div>
+            </div>
+            <div class="map-pin" style="top:15%;left:35%;">
+              <div class="pin-stamp" style="background:#F3E8FF;">🏮</div>
+              <div class="pin-label">北京 · 6枚</div>
+            </div>
+            <div class="map-pin" style="top:50%;left:20%;">
+              <div class="pin-stamp" style="background:#FEE2E2;">🌆</div>
+              <div class="pin-label">上海 · 10枚</div>
+            </div>
+            <!-- Bottom sheet hint -->
+            <div style="position:absolute;bottom:0;left:0;right:0;background:white;border-radius:16px 16px 0 0;padding:10px 14px;box-shadow:0 -2px 10px rgba(0,0,0,.08);">
+              <div style="width:32px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 8px;"></div>
+              <div style="font-size:10px;font-weight:600;">附近的印章</div>
+              <div style="display:flex;gap:8px;margin-top:6px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:#FEE2E2;display:flex;align-items:center;justify-content:center;font-size:16px;">🌆</div>
+                <div>
+                  <div style="font-size:9px;font-weight:600;">外滩夜景</div>
+                  <div style="font-size:8px;color:#999;">上海 · 2026.02.14</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-tab-bar">
+          <div class="tab-item"><span class="tab-icon">🏠</span>首页</div>
+          <div class="tab-item active"><span class="tab-icon">🗺️</span>地图</div>
+          <div class="tab-item"><span class="tab-icon" style="font-size:28px;color:var(--ink-red);margin-top:-14px;background:var(--ink-red);color:white;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:20px;">+</span></div>
+          <div class="tab-item"><span class="tab-icon">📖</span>集册</div>
+          <div class="tab-item"><span class="tab-icon">👤</span>我的</div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════ 5. USER FLOW ═══════════════════════════ -->
+<section id="userflow">
+  <h2><span class="section-num">5</span>完整用户操作流程</h2>
+
+  <h3>核心流程：拍照 → 生成印章 → 收入集册</h3>
+
+  <div class="flow-container">
+    <div class="flow-row">
+      <span class="flow-step action">打开 App</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step action">点击 ⊕ 按钮</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step process">拍照 / 选图</span>
+    </div>
+    <div class="flow-row"><span class="flow-arrow" style="transform:rotate(90deg)">↓</span></div>
+    <div class="flow-row">
+      <span class="flow-step process">选择风格</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step process">选择形状</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step process">选颜色</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step process">添加文字（可选）</span>
+    </div>
+    <div class="flow-row"><span class="flow-arrow" style="transform:rotate(90deg)">↓</span></div>
+    <div class="flow-row">
+      <span class="flow-step action">点击「生成」</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step local">⏳ 等待 AI 处理 ~25s</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step result">预览结果</span>
+    </div>
+    <div class="flow-row"><span class="flow-arrow" style="transform:rotate(90deg)">↓</span></div>
+    <div class="flow-row">
+      <span class="flow-step process">切换其他风格预览</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step action">选择满意的版本</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step result">💾 保存到集册</span>
+    </div>
+  </div>
+
+  <h3>分支流程</h3>
+  <table>
+    <tr><th>场景</th><th>流程</th></tr>
+    <tr><td>浏览集册</td><td>首页 → 点击集册 → 翻阅印章 → 点击单枚查看大图</td></tr>
+    <tr><td>查看印迹地图</td><td>Tab 地图 → 缩放/移动 → 点击地点气泡 → 查看该地印章列表</td></tr>
+    <tr><td>分享印章</td><td>印章详情 → 分享 → 选择模板卡片 → 生成分享图 → 保存/发送</td></tr>
+    <tr><td>导出 PNG</td><td>印章详情 → 导出 → 选透明 PNG / 白底 / 添加背景 → 保存到相册</td></tr>
+    <tr><td>管理集册</td><td>集册页 → 长按拖拽排序 / 新建集册 / 编辑封面</td></tr>
+    <tr><td>重新编辑印章</td><td>印章详情 → 编辑 → 修改颜色/形状/文字 → 保存新版本（保留原版）</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════ 6. ARCHITECTURE ═══════════════════════════ -->
+<section id="arch">
+  <h2><span class="section-num">6</span>技术架构</h2>
+
+  <div class="arch-diagram">
+    <div class="arch-label">客户端</div>
+    <div class="arch-layer">
+      <div class="arch-box client">iOS App (Swift)</div>
+      <div class="arch-box client">Android App (Kotlin)</div>
+      <div class="arch-box client">微信小程序（可选）</div>
+    </div>
+
+    <div class="arch-divider">▼ ▼ ▼ HTTPS ▼ ▼ ▼</div>
+
+    <div class="arch-label">API 网关</div>
+    <div class="arch-layer">
+      <div class="arch-box api">API Gateway / 负载均衡</div>
+    </div>
+
+    <div class="arch-divider">▼ ▼ ▼</div>
+
+    <div class="arch-label">后端服务</div>
+    <div class="arch-layer">
+      <div class="arch-box service">用户服务</div>
+      <div class="arch-box service">印章生成服务</div>
+      <div class="arch-box service">集册管理服务</div>
+      <div class="arch-box service">地图/地点服务</div>
+    </div>
+
+    <div class="arch-divider">▼ ▼ ▼</div>
+
+    <div class="arch-label">数据与外部服务</div>
+    <div class="arch-layer">
+      <div class="arch-box storage">PostgreSQL / 用户数据</div>
+      <div class="arch-box storage">OSS / 图片存储</div>
+      <div class="arch-box external">GMI Gemini API</div>
+      <div class="arch-box external">地图 SDK</div>
+    </div>
+  </div>
+
+  <h3>关键技术选型建议</h3>
+  <table>
+    <tr><th>模块</th><th>推荐方案</th><th>原因</th></tr>
+    <tr><td>移动端</td><td>Flutter 或 React Native</td><td>跨平台，一套代码覆盖 iOS + Android</td></tr>
+    <tr><td>后端 API</td><td>Python FastAPI</td><td>与现有 stamp_generator.py 同语言，复用核心逻辑</td></tr>
+    <tr><td>图片存储</td><td>阿里云 OSS / AWS S3</td><td>海量图片存储 + CDN 加速</td></tr>
+    <tr><td>数据库</td><td>PostgreSQL + PostGIS</td><td>关系数据 + 地理位置查询（印迹地图）</td></tr>
+    <tr><td>AI 生成</td><td>GMI Cloud Gemini API</td><td>已验证可用，支持 Flash/Pro 两档</td></tr>
+    <tr><td>背景去除</td><td>服务端 rembg</td><td>移到服务端统一处理，减轻客户端负担</td></tr>
+    <tr><td>地图</td><td>高德 / MapBox</td><td>国内用高德，国际版用 MapBox</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════ 7. ROADMAP ═══════════════════════════ -->
+<section id="roadmap">
+  <h2><span class="section-num">7</span>开发路线图</h2>
+
+  <div class="roadmap">
+
+    <div class="roadmap-item">
+      <div class="roadmap-dot done"></div>
+      <div class="roadmap-phase">已完成</div>
+      <div class="roadmap-title">Phase 0 · 概念验证 Demo</div>
+      <div class="roadmap-desc">Gradio Web Demo，验证 AI 印章生成核心流水线可行性。4 种风格，6 种颜色，透明 PNG 输出。</div>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="roadmap-dot current"></div>
+      <div class="roadmap-phase">当前阶段</div>
+      <div class="roadmap-title">Phase 1 · 产品规划 &amp; 核心功能完善</div>
+      <div class="roadmap-desc">扩展印章风格（10+种）、形状裁切、文字叠加、印泥纹理。搭建后端 API 服务，完成移动端基础框架。</div>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="roadmap-dot future"></div>
+      <div class="roadmap-phase">Phase 2</div>
+      <div class="roadmap-title">App v1.0 · 核心体验</div>
+      <div class="roadmap-desc">印章生成 + 集册管理 + 印迹地图 + 导出分享。覆盖核心用户旅程，完成首轮用户测试。</div>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="roadmap-dot future"></div>
+      <div class="roadmap-phase">Phase 3</div>
+      <div class="roadmap-title">App v2.0 · 体验升级</div>
+      <div class="roadmap-desc">一键多风格预览、时间轴、模板库、分享卡片生成器、成就系统。提升留存和使用频次。</div>
+    </div>
+
+    <div class="roadmap-item">
+      <div class="roadmap-dot future"></div>
+      <div class="roadmap-phase">Phase 4</div>
+      <div class="roadmap-title">App v3.0 · 社交与生态</div>
+      <div class="roadmap-desc">社区广场、印章互赠、每日主题打卡、创作者入驻（设计师上传模板）。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<div style="text-align:center;padding:40px 20px;color:#bbb;font-size:.8em;border-top:1px solid var(--border);">
+  印迹 · Imprint &mdash; 产品规划文档 v1.0 &mdash; 2026.03.27
+</div>
+
+</div><!-- container -->
+</body>
+</html>
