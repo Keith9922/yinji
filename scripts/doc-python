@@ -1,0 +1,12 @@
+#!/bin/zsh
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+VENV_PYTHON="$ROOT_DIR/.venv-docs/bin/python"
+
+if [[ ! -x "$VENV_PYTHON" ]]; then
+  echo "缺少文档处理环境: $VENV_PYTHON" >&2
+  exit 1
+fi
+
+exec "$VENV_PYTHON" "$@"

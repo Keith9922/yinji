@@ -1,6 +1,1 @@
-gradio>=5.0
-rembg
-Pillow
-requests
-python-dotenv
-numpy
+-r requirements-demo.txt

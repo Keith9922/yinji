@@ -9,18 +9,26 @@ import math
 import os
 import random
 import time
+from typing import Any
 
 import numpy as np
 import requests
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+from dotenv import load_dotenv
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 # ── Configuration ─────────────────────────────────────────────────────────────
+
+load_dotenv()
 
 GMI_API_KEY = os.environ.get("GMI_API_KEY", "")
 GMI_QUEUE_URL = "https://console.gmicloud.ai/api/v1/ie/requestqueue/apikey"
 
 GEMINI_MODEL = "gemini-3.1-flash-image-preview"
 GEMINI_MODEL_PRO = "gemini-3-pro-image-preview"
+REMBG_MODEL = os.environ.get("REMBG_MODEL", "u2netp")
+REMBG_MAX_SIDE = max(256, int(os.environ.get("REMBG_MAX_SIDE", "768")))
+MOCK_GENERATION = os.environ.get("MOCK_GENERATION", "").strip().lower() in {"1", "true", "yes", "on"}
+_REMBG_SESSION: Any | None = None
 
 # ── Stamp Styles (Prompts) ────────────────────────────────────────────────────
 
@@ -123,6 +131,11 @@ STAMP_TEXTURES = {
     "印泥晕染": "ink_bleed",
     "边缘磨损": "worn_edges",
     "做旧效果": "vintage",
+}
+
+ENGINE_OPTIONS = {
+    "flash": "极速 (Flash ~25s)",
+    "pro": "高质量 (Pro ~40s)",
 }
 
 # ── Gacha / Blind-box System ──────────────────────────────────────────────────
@@ -260,6 +273,62 @@ def _download_image(url: str) -> Image.Image:
     return Image.open(io.BytesIO(resp.content)).convert("RGB")
 
 
+def _mock_generate_stamp(img: Image.Image, style: str) -> Image.Image:
+    """Local fallback used for integration testing when GMI is unavailable."""
+    working = img.copy()
+    working.thumbnail((1024, 1024), Image.LANCZOS)
+    gray = ImageOps.grayscale(working)
+    softened = gray.filter(ImageFilter.GaussianBlur(radius=1.2))
+    edges = softened.filter(ImageFilter.FIND_EDGES)
+    edges = ImageOps.invert(edges)
+    poster = ImageOps.posterize(softened.convert("RGB"), 2).convert("L")
+    combined = ImageChops.darker(poster, edges)
+
+    if style in {"版画木刻", "铜版雕刻", "金石篆刻"}:
+        combined = combined.filter(ImageFilter.EDGE_ENHANCE_MORE)
+    elif style in {"水墨山水", "水彩速写"}:
+        combined = combined.filter(ImageFilter.GaussianBlur(radius=0.8))
+    elif style == "像素复古":
+        reduced = combined.resize((160, 160), Image.Resampling.NEAREST)
+        combined = reduced.resize(working.size, Image.Resampling.NEAREST)
+
+    threshold = 170 if style in {"现代极简", "像素复古"} else 185
+    stamped = combined.point(lambda value: 255 if value > threshold else 0, mode="1")
+    return stamped.convert("RGB")
+
+
+def _normalize_engine(engine: str) -> str:
+    value = (engine or "").strip().lower()
+    if value in {"pro", "high", "高质量"}:
+        return "pro"
+    if "pro" in value or "高质量" in engine:
+        return "pro"
+    return "flash"
+
+
+def get_generation_options() -> dict:
+    return {
+        "engines": [
+            {"value": key, "label": label}
+            for key, label in ENGINE_OPTIONS.items()
+        ],
+        "styles": list(STAMP_PROMPTS.keys()),
+        "colors": INK_COLORS,
+        "shapes": list(STAMP_SHAPES.keys()),
+        "textures": list(STAMP_TEXTURES.keys()),
+        "textPositions": ["上方弧形", "下方弧形", "底部横排"],
+        "defaults": {
+            "engine": "flash",
+            "style": list(STAMP_PROMPTS.keys())[0],
+            "shape": "无边框",
+            "colorName": "朱红",
+            "texture": "无",
+            "textPosition": "底部横排",
+            "enableGacha": True,
+        },
+    }
+
+
 # ── Font Helper ───────────────────────────────────────────────────────────────
 
 _FONT_CACHE: dict[tuple[int, str], ImageFont.FreeTypeFont] = {}
@@ -303,6 +372,9 @@ def generate_with_gemini(
     extra_prompt_suffix: str = "",
 ) -> Image.Image:
     """Use Gemini to convert photo to stamp style via GMI Cloud."""
+    if MOCK_GENERATION:
+        return _mock_generate_stamp(img, style)
+
     prompt = STAMP_PROMPTS.get(style, STAMP_PROMPTS["复古橡皮章"]) + extra_prompt_suffix
     model = GEMINI_MODEL_PRO if quality == "high" else GEMINI_MODEL
     img_b64 = _image_to_base64(img)
@@ -342,13 +414,37 @@ def enhance_stamp_contrast(img: Image.Image) -> Image.Image:
 
 # ── Post-Processing: Background Removal ───────────────────────────────────────
 
+def _get_rembg_session():
+    global _REMBG_SESSION
+    if _REMBG_SESSION is None:
+        from rembg import new_session
+        _REMBG_SESSION = new_session(REMBG_MODEL)
+    return _REMBG_SESSION
+
+
+def _resize_for_rembg(img: Image.Image) -> tuple[Image.Image, tuple[int, int]]:
+    original_size = img.size
+    if max(original_size) <= REMBG_MAX_SIDE:
+        return img.copy(), original_size
+
+    resized = img.copy()
+    resized.thumbnail((REMBG_MAX_SIDE, REMBG_MAX_SIDE), Image.LANCZOS)
+    return resized, original_size
+
+
 def remove_background(img: Image.Image) -> Image.Image:
     """Remove background using rembg, return RGBA transparent image."""
     from rembg import remove as rembg_remove
+
+    session = _get_rembg_session()
+    working_img, original_size = _resize_for_rembg(img)
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    result_bytes = rembg_remove(buf.getvalue())
-    return Image.open(io.BytesIO(result_bytes)).convert("RGBA")
+    working_img.save(buf, format="PNG")
+    result_bytes = rembg_remove(buf.getvalue(), session=session)
+    result = Image.open(io.BytesIO(result_bytes)).convert("RGBA")
+    if result.size != original_size:
+        result = result.resize(original_size, Image.LANCZOS)
+    return result
 
 
 # ── Post-Processing: Shape Masks ──────────────────────────────────────────────
@@ -769,10 +865,10 @@ def run_pipeline(
         if log:
             log(msg)
 
-    if not GMI_API_KEY:
+    if not GMI_API_KEY and not MOCK_GENERATION:
         raise RuntimeError("GMI_API_KEY is not set.")
 
-    quality = "high" if "Pro" in engine or "高质量" in engine else "standard"
+    quality = "high" if _normalize_engine(engine) == "pro" else "standard"
 
     # ── Step 0: Gacha Roll ──
     if enable_gacha:

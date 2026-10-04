@@ -4,6 +4,7 @@
 Upload a photo and transform it into a stamp-sticker with transparent background.
 Now with: 10 styles, shapes, text overlay, textures, and gacha/blind-box surprises!
 """
+import os
 import sys
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).parent))
 from stamp_generator import (
     run_pipeline, INK_COLORS, STAMP_PROMPTS,
-    STAMP_SHAPES, STAMP_TEXTURES,
+    STAMP_SHAPES, STAMP_TEXTURES, ENGINE_OPTIONS,
 )
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -24,10 +25,7 @@ TEXTURES = list(STAMP_TEXTURES.keys())
 
 TEXT_POSITIONS = ["上方弧形", "下方弧形", "底部横排"]
 
-ENGINES = [
-    "极速 (Flash ~25s)",
-    "高质量 (Pro ~40s)",
-]
+ENGINES = list(ENGINE_OPTIONS.values())
 
 RARITY_PLACEHOLDER = '<div style="text-align:center;color:#bbb;padding:8px;font-size:.9em;">🎲 生成后揭晓稀有度</div>'
 
@@ -141,7 +139,7 @@ footer { display:none !important; }
 }
 """
 
-with gr.Blocks(css=CSS, title="印迹 - AI 印章生成器") as demo:
+with gr.Blocks(title="印迹 - AI 印章生成器") as demo:
 
     gr.HTML('<div class="stamp-title">🖋 印迹 · AI 印章生成器</div>')
     gr.HTML('<div class="stamp-sub">📸 上传照片 · AI 变身印章贴纸 · 🎰 每次生成都有盲盒惊喜！</div>')
@@ -260,8 +258,8 @@ with gr.Blocks(css=CSS, title="印迹 - AI 印章生成器") as demo:
 
 if __name__ == "__main__":
     import socket
-    host = "0.0.0.0"
-    port = 7860
+    host = os.environ.get("GRADIO_HOST", "0.0.0.0")
+    port = int(os.environ.get("GRADIO_PORT", "7860"))
 
     print("\n🖋  印迹 Demo 启动中...")
     print(f"   本地访问: http://localhost:{port}")
@@ -272,4 +270,4 @@ if __name__ == "__main__":
         pass
     print()
 
-    demo.launch(server_name=host, server_port=port, share=False)
+    demo.launch(server_name=host, server_port=port, share=False, css=CSS)
